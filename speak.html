@@ -1,0 +1,34 @@
+<html lang="eng">
+<head>
+<title>TTS CONVERTER</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<h1>Text to Speech Converter</h1>
+<textarea id="textToSpeak" rows="10" cols="70">HERE IS YOUR TEXT...</textarea>
+<button id="speakButton">LISTEN</button>
+
+<script>
+// JavaScript code goes here
+const speakButton = document.getElementById("speakButton");
+const textToSpeak = document.getElementById("textToSpeak");
+
+// Check if the browser supports speech synthesis
+if ('speechSynthesis' in window) {
+    const synthesis = window.speechSynthesis;
+
+    speakButton.addEventListener("click", () => {
+        const text = textToSpeak.value;
+        if (text !== "") {
+            const utterance = new SpeechSynthesisUtterance(text);
+            synthesis.speak(utterance);
+        }
+    });
+} else {
+    speakButton.disabled = true;
+    textToSpeak.placeholder = "Speech synthesis not supported";
+}
+</script>
+</body>
+</html>
