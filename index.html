@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="text/css" href="https://cdn-icons-png.flaticon.com/512/7825/7825835.png">
+    <title>TTS Online</title>
+    <style>
+        *{
+            scrollbar-width: thin;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+            width: auto;
+            max-width: 500px;
+            color: green;
+            transform: scale(1.1);
+        }
+        h1 {
+            text-align: center;
+            color: green;
+            font-family: gulim;
+            font-size: 40px;
+        }
+        textarea {
+            width: 480px;
+            height: 140px;
+            margin-bottom: 0px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid green;
+            resize: none;
+            text-align: left;
+            font-family: courier;
+            font-weight: bold;
+            color: darkcyan;
+            font-size: 20px;
+        }
+        select, input[type="range"], input[type="file"] {
+            width: 480px;
+            padding: 10px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            border: 1px solid green;
+            color: green;
+        }
+        textarea:focus {
+            outline: none;
+        }
+        ::selection {
+            background-color: darkcyan;
+            color: white;
+        }
+        button {
+            display: inline-block;
+            background-color: #28a745;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transform: scaleX(1.2);
+            transition: 1s;
+            width: 150px;
+            margin: 0px 35%;
+            translate: -150px;
+        }
+        #audioPlayer {
+            margin-top: -45px;
+            margin-left: 240px;
+        }
+        button:hover {
+            background-color: #218838;
+            width: 200px;
+        }
+        #voiceContainer {
+            display: none; /* Hidden by default */
+        }
+        .wc {
+            font-size: 10px;
+            font-weight: bold;
+            margin: 10px 0px;
+            margin-left: 450px;
+            margin-top: -10px;
+            padding: 0px 10px;
+            background-color: white;
+            position: absolute;
+        }
+        @media (max-width: 400px){
+            .container{
+                transform: scale(.7);
+                background-color: transparent;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>T T S Online</h1>
+        
+        <!-- File input for text files -->
+        <label for="fileInput">Upload a text file:</label>
+        <input type="file" id="fileInput" accept=".txt">
+
+        <!-- Textarea for user input -->
+        <textarea id="textInput" placeholder="Enter your text here..."></textarea>
+        <p class="wc">0</p>
+
+        <!-- Language selection -->
+        <label for="languageSelect">Language:</label>
+        <select id="languageSelect" onchange="updateVoiceOptions()">
+            <option value="" selected>Select Language</option>
+            <option value="en-US">English (US)</option>
+            <option value="en-GB">English (UK)</option>
+            <option value="en-IN">English (India)</option>
+            <option value="es-ES">Spanish</option>
+            <option value="fr-FR">French</option>
+            <option value="de-DE">German</option>
+            <option value="it-IT">Italian</option>
+            <option value="hi-IN">Hindi</option>
+            <option value="ta-IN">Tamil</option>
+            <option value="ar-EG">Arabic</option>
+            <option value="ja-JP">Japanese</option>
+            <option value="ko-KR">Korean</option>
+            <option value="zh-CN">Chinese (Simplified)</option>
+            <option value="zh-TW">Chinese (Traditional)</option>
+            <option value="pt-PT">Portuguese (Portugal)</option>
+            <option value="pt-BR">Portuguese (Brazil)</option>
+            <option value="ru-RU">Russian</option>
+            <option value="tr-TR">Turkish</option>
+        </select>
+
+        <!-- Voice selection -->
+        <div id="voiceContainer">
+            <label for="voiceSelect">Voice:</label>
+            <select id="voiceSelect">
+                <!-- Options will be populated dynamically -->
+            </select>
+        </div>
+
+        <!-- Speed control -->
+        <label for="speedControl">Speed:</label>
+        <span id="speedValue">0</span>
+        <input type="range" id="speedControl" min="-10" max="10" step=".5" value="0">
+        
+        <!-- Pitch control -->
+        <label for="pitchControl">Pitch:</label>
+        <span id="pitchValue">0</span>
+        <input type="range" id="pitchControl" min="-10" max="10" step="1" value="0" disabled>
+
+        <!-- Convert button -->
+        <button onclick="convertTextToAudio()">Convert to Audio</button>
+        <br>
+        <!-- Audio player -->
+        <audio id="audioPlayer" controls style="display:none;"></audio>
+    </div>
+
+    <script>
+        const voices = {
+            'en-US': ['Linda', 'John'],
+            'en-GB': ['Alice', 'Nancy', 'Lily', 'Harry'],
+            'en-IN': ['Eka', 'Ajit'],
+            'es-ES': ['Luna', 'Diego', 'Sofia', 'Camila'],
+            'fr-FR': ['Axel', 'Iva', 'Bette', 'Zola'],
+            'de-DE': ['Hanna', 'Jonas', 'Lina', 'Lukas'],
+            'it-IT': ['Pietro', 'Bria'],
+            'hi-IN': ['Puja', 'Kabir'],
+            'ta-IN': ['Sai'],
+            'ar-EG': ['Oda'],
+            'ja-JP': ['Hina', 'Airi', 'Akira', 'Fumi'],
+            'ko-KR': ['Nari'],
+            'zh-CN': ['Xia', 'Chen'],
+            'zh-TW': ['Akemi', 'Lee', 'Lin'],
+            'pt-PT': ['Leonor'],
+            'pt-BR': ['Marcia', 'Dinis'],
+            'ru-RU': ['Olga', 'Peter'],
+            'tr-TR': ['Omer']
+        };
+
+        function updateVoiceOptions() {
+            const languageSelect = document.getElementById('languageSelect');
+            const voiceSelect = document.getElementById('voiceSelect');
+            const voiceContainer = document.getElementById('voiceContainer');
+            const selectedLanguage = languageSelect.value;
+
+            // Clear existing options
+            voiceSelect.innerHTML = '';
+
+            if (selectedLanguage) {
+                const availableVoices = voices[selectedLanguage] || [];
+                if (availableVoices.length > 0) {
+                    voiceContainer.style.display = 'block';
+                    availableVoices.forEach(voice => {
+                        const option = document.createElement('option');
+                        option.value = voice;
+                        option.textContent = voice;
+                        voiceSelect.appendChild(option);
+                    });
+                } else {
+                    voiceContainer.style.display = 'none';
+                }
+            } else {
+                voiceContainer.style.display = 'none';
+            }
+        }
+
+        // Handle text file upload
+        document.getElementById('fileInput').addEventListener('change', function() {
+            const file = this.files[0];
+            if (file && file.type === 'text/plain') {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const text = e.target.result;
+                    document.getElementById('textInput').value = text;
+                };
+                reader.readAsText(file);
+            } else {
+                alert('Please upload a valid .txt file.');
+            }
+        });
+
+        // Update speed value display
+        document.getElementById('speedControl').addEventListener('input', function() {
+            document.getElementById('speedValue').textContent = this.value;
+        });
+
+        // Update pitch value display
+        document.getElementById('pitchControl').addEventListener('input', function() {
+            document.getElementById('pitchValue').textContent = this.value;
+        });
+
+        // Convert text to audio
+        function convertTextToAudio() {
+            const apiKey = 'e011c2dc1c5e41afbc94343c640140ba'; // Replace with your Voice RSS API key
+            const text = document.getElementById('textInput').value;
+            const language = document.getElementById('languageSelect').value;
+            const voice = document.getElementById('voiceSelect').value;
+            const speed = document.getElementById('speedControl').value;
+            const pitch = document.getElementById('pitchControl').value;
+
+            // API URL with pitch, speed parameters
+            const url = `https://api.voicerss.org/?key=${apiKey}&hl=${language}&v=${voice}&src=${encodeURIComponent(text)}&r=${speed}&p=${pitch}&c=mp3`;
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok.');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    const audioUrl = URL.createObjectURL(blob);
+                    const audioPlayer = document.getElementById('audioPlayer');
+                    audioPlayer.style.display = 'block';
+                    audioPlayer.style.transform = 'scale(.7)';
+                    audioPlayer.src = audioUrl;
+                    audioPlayer.play();
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error);
+                });
+                const textarea = document.getElementById('textInput');
+                document.querySelector(".wc").textContent = textarea.value.length;
+        }
+
+        const textarea = document.getElementById('textInput');
+        // Function to handle input events
+        function handleKeydown(event) {
+            const isBackspace = event.key === 'Backspace';
+            const isCtrlA = event.ctrlKey && event.key === 'a';
+            const isCtrlZ = event.ctrlKey && event.key === 'z';
+            const isArrowKey = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key);
+
+            if (textarea.value.length >= 5000 && !(isBackspace || isCtrlA || isCtrlZ || isArrowKey)) {
+                event.preventDefault();
+            }
+        }
+
+        // Attach keydown event listener to the textarea
+        textarea.addEventListener('keydown', handleKeydown);
+
+        // Ensure textarea behavior updates dynamically
+        textarea.addEventListener('input', () => {
+            document.querySelector(".wc").textContent = textarea.value.length;
+
+            if (textarea.value.length < 5000) {
+                // Remove the keydown event listener if length is less than 500
+                textarea.removeEventListener('keydown', handleKeydown);
+                textarea.addEventListener('keydown', handleKeydown);
+            }
+            if (textarea.value.length > 5500) {
+                // Remove the keydown event listener if length is less than 500
+                alert("too many characters; page has to be reloaded...");
+                location.reload();
+            }
+        });
+    </script>
+</body>
+</html>
