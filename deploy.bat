@@ -5,4 +5,5 @@ git pull origin main
 git add .
 git commit --allow-empty -m "Trigger GitHub Pages rebuild"
 git push origin main
-echo wait for timeout -t 10 secs
+echo wait for 
+timeout -t 10 secs
