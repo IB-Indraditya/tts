@@ -7,4 +7,4 @@ git commit --allow-empty -m "Trigger GitHub Pages rebuild"
 git push origin main
 echo wait for a moment
 timeout /t 10 >nul
-echo changes updated succesfully
+echo changes made succesfully
