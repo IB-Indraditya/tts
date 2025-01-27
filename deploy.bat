@@ -1,5 +1,5 @@
 @echo off
-git status
+::git status
 pause>nul
 git pull origin main
 git add .
